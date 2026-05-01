@@ -7,7 +7,6 @@ st.set_page_config(
     page_icon="🛡️",
     layout="wide"
 )
-
 # CLEAN LIGHT THEME - Easy to read
 st.markdown("""
 <style>
