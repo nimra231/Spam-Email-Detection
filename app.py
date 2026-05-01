@@ -233,7 +233,7 @@ if analyze:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🛡️ <strong>Nimra's AI Spam Detector</strong> | Machine Learning Portfolio Project</p>
-    <p style="font-size: 0.8rem;">Powered by Streamlit | Real-time Email Security Analysis</p>
+    <p>🛡️ <strong>Nimra's AI Spam Detector/p>
+    <p style="font-size: 0.8rem;</p>
 </div>
 """, unsafe_allow_html=True)
