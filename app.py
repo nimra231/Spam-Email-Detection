@@ -118,14 +118,13 @@ st.markdown("""
 st.markdown("""
 <div class="main-header">
     <h1>🛡️ NIMRA'S AI SPAM DETECTOR</h1>
-    <p>Enterprise-Grade Email Security | AI-Powered Protection</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
     st.markdown("## 👩‍💻 Developer")
-    st.info("**Nimra**\n\nAI/ML Engineer")
+    st.info("**Nimra**\)
     st.markdown("---")
     
     st.markdown("## 📊 Live Protection Stats")
