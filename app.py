@@ -124,7 +124,7 @@ st.markdown("""
 # Sidebar
 with st.sidebar:
     st.markdown("## 👩‍💻 Developer")
-    st.info("**Nimra**\)
+    st.info("Nimra")
     st.markdown("---")
     
     st.markdown("## 📊 Live Protection Stats")
