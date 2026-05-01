@@ -119,7 +119,6 @@ st.markdown("""
 <div class="main-header">
     <h1>🛡️ NIMRA'S AI SPAM DETECTOR</h1>
     <p>Enterprise-Grade Email Security | AI-Powered Protection</p>
-    <p style="font-size:0.9rem; margin-top:5px;">Developed by Nimra - AI/ML Specialist</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -233,7 +232,7 @@ if analyze:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🛡️ <strong>Nimra's AI Spam Detector/p>
-    <p style="font-size: 0.8rem;</p>
+    <p>🛡️ <strong>Nimra's AI Spam Detector>
+
 </div>
 """, unsafe_allow_html=True)
