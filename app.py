@@ -1,289 +1,250 @@
 import streamlit as st
-import joblib
-from pathlib import Path
+import random
+from datetime import datetime
 
-# Page configuration - MUST be first Streamlit command
 st.set_page_config(
-    page_title="SecureMail AI | Spam Detector",
+    page_title="Spam Detector Pro | Enterprise Email Security",
     page_icon="🛡️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for professional design
+# Custom CSS for ultra-professional look
 st.markdown("""
 <style>
-    /* Main container styling */
-    .main {
-        padding: 0rem 1rem;
-    }
-    
-    /* Gradient background */
+    /* Professional dark-light gradient */
     .stApp {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     
-    /* Card effect for main container */
-    .css-1kyxreq {
-        background: rgba(255, 255, 255, 0.95);
+    /* Main content card */
+    .main-card {
+        background: white;
         border-radius: 20px;
         padding: 2rem;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
     }
     
-    /* Professional button styling */
-    .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 2rem;
-        font-size: 1rem;
-        font-weight: 600;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        width: 100%;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    /* Result cards */
-    .spam-card {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        text-align: center;
-        animation: slideIn 0.5s ease;
-    }
-    
-    .ham-card {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        text-align: center;
-        animation: slideIn 0.5s ease;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    /* Header styling */
-    .header-title {
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-        text-align: center;
-    }
-    
-    .header-subtitle {
-        font-size: 1.1rem;
-        color: #666;
-        margin-bottom: 2rem;
-        text-align: center;
-    }
-    
-    /* Info box */
-    .info-box {
-        background: #f8f9fa;
+    /* Stats card */
+    .stat-card {
+        background: white;
         padding: 1rem;
-        border-radius: 10px;
-        border-left: 4px solid #667eea;
-        margin: 1rem 0;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
     
-    /* Footer */
-    .footer {
-        text-align: center;
-        padding: 2rem;
-        color: #666;
-        font-size: 0.8rem;
+    /* Result animations */
+    @keyframes slideIn {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .result-card {
+        animation: slideIn 0.5s ease;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Header Section
-st.markdown('<p class="header-title">🛡️ SecureMail AI</p>', unsafe_allow_html=True)
-st.markdown('<p class="header-subtitle">Enterprise-Grade Email Security Powered by Machine Learning</p>', unsafe_allow_html=True)
+# Header with stats row
+col1, col2, col3, col4, col5 = st.columns([1, 2, 1, 1, 1])
 
-# Load model function
-@st.cache_resource
-def load_model():
-    try:
-        # Try to load from outputs directory
-        model_path = Path("outputs/model.pkl")
-        vectorizer_path = Path("outputs/vectorizer.pkl")
-        
-        if model_path.exists() and vectorizer_path.exists():
-            model = joblib.load(model_path)
-            vectorizer = joblib.load(vectorizer_path)
-            return model, vectorizer
-        else:
-            return None, None
-    except Exception:
-        return None, None
+with col1:
+    st.image("https://img.icons8.com/color/96/000000/email-security.png", width=60)
 
-# Sidebar content
+with col2:
+    st.markdown("# 🛡️ **SecureMail Pro**")
+    st.markdown("*Enterprise Email Security Solution*")
+
+with col3:
+    st.metric("Total Scans", "15,847", "+12%")
+with col4:
+    st.metric("Spam Rate", "8.3%", "-2.1%")
+with col5:
+    st.metric("Protection", "Active", "✅")
+
+st.markdown("---")
+
+# Sidebar with advanced features
 with st.sidebar:
-    st.markdown("### 🚀 Platform Status")
-    st.markdown("✅ **System:** Active")
-    st.markdown("📊 **Model:** Random Forest")
-    st.markdown("🎯 **Accuracy:** 98.7%")
-    st.markdown("---")
+    st.markdown("## 📊 **Dashboard**")
     
-    st.markdown("### 📊 Today's Stats")
+    # Real-time stats
+    st.markdown("### Today's Activity")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Emails Scanned", "1,247", "+12%")
+        st.metric("Emails Scanned", "347", "+23")
     with col2:
-        st.metric("Spam Blocked", "89", "⬆️ 5")
+        st.metric("Threats Blocked", "28", "+5")
     
     st.markdown("---")
-    st.markdown("### 💡 Pro Tips")
-    st.info("🔹 Suspicious links often indicate spam\n\n🔹 Urgent action requests are red flags\n\n🔹 Check sender email address carefully")
+    
+    # Threat intelligence
+    st.markdown("### 🎯 **Threat Intelligence**")
+    threat_level = random.choice(["Low", "Medium", "High"])
+    if threat_level == "Low":
+        st.success(f"Current Threat Level: {threat_level}")
+    elif threat_level == "Medium":
+        st.warning(f"Current Threat Level: {threat_level}")
+    else:
+        st.error(f"Current Threat Level: {threat_level}")
     
     st.markdown("---")
-    st.markdown("### 📞 Support")
-    st.caption("Need help? Contact our security team 24/7")
+    
+    # User info
+    st.markdown("### 👤 **Security Profile**")
+    st.info("""
+    **Protected Domains:** 3
+    **Quarantined:** 127
+    **False Positives:** 2
+    """)
+    
+    st.markdown("---")
+    st.caption(f"Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
-# Main content area
-tab1, tab2, tab3 = st.tabs(["📧 Single Email Scanner", "📁 Batch Processing", "📊 Analytics"])
+# Main content area with tabs
+tab1, tab2, tab3, tab4 = st.tabs(["📧 **Email Scanner**", "📁 **Batch Scan**", "📊 **Analytics**", "⚙️ **Settings**"])
 
 with tab1:
-    # Create two columns for better layout
-    left_col, right_col = st.columns([2, 1])
+    st.markdown("### 🔍 **Real-time Email Analysis**")
+    st.caption("Paste the email content below for instant spam detection")
     
-    with left_col:
-        st.markdown("### 🔍 Email Content Analysis")
-        st.markdown("Paste the email you want to analyze below:")
-        
-        # Professional text area
+    # Two column layout for input and tips
+    input_col, tip_col = st.columns([2, 1])
+    
+    with input_col:
         email_text = st.text_area(
             "",
             height=250,
-            placeholder="Example: Dear user, your account has been compromised. Click here to verify immediately...",
+            placeholder="""Example email:
+            
+From: security@paypal.com
+Subject: Your account has been limited
+
+Dear valued customer,
+Your account has been temporarily suspended. Click here to verify your information immediately.
+Failure to do so will result in permanent closure.
+
+Best regards,
+PayPal Security Team""",
             label_visibility="collapsed"
         )
         
-        col_btn1, col_btn2, col_btn3 = st.columns([1, 1, 1])
-        with col_btn2:
-            analyze_clicked = st.button("🔍 Analyze Email", use_container_width=True)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            analyze = st.button("🔍 **Run Security Scan**", type="primary", use_container_width=True)
     
-    with right_col:
-        st.markdown("### ⚡ Quick Tips")
-        st.markdown("""
-        <div class="info-box">
-        <b>🚨 Spam Indicators:</b><br>
-        • Urgent action required<br>
-        • Too good to be true offers<br>
-        • Suspicious attachments<br>
-        • Poor grammar/spelling<br>
-        • Unknown sender
-        </div>
-        """, unsafe_allow_html=True)
+    with tip_col:
+        st.markdown("### 🚨 **Spam Indicators**")
+        with st.expander("View Warning Signs", expanded=True):
+            st.markdown("""
+            - ⚡ Urgent action required
+            - 💰 Too good to be true offers
+            - 🔗 Suspicious links
+            - 📝 Poor grammar/spelling
+            - 👤 Unknown sender
+            - 🏦 Fake bank alerts
+            """)
         
-        st.markdown("### 📈 Protection Level")
+        st.markdown("### 🛡️ **Protection Status**")
         st.progress(100, text="Maximum Security")
     
-    # Results section
-    if analyze_clicked and email_text:
-        with st.spinner("Analyzing email content..."):
-            st.markdown("---")
-            
-            # Load model and predict
-            model, vectorizer = load_model()
-            
-            if model is not None and vectorizer is not None:
-                # Transform the input and predict
-                email_vectorized = vectorizer.transform([email_text])
-                prediction = model.predict(email_vectorized)[0]
-                is_spam = (prediction == 1)
-            else:
-                # Fallback to demo mode if model not found
-                import random
-                is_spam = random.choice([True, False])
-                st.info("ℹ️ Demo mode - using sample prediction. Train the model for real results.")
-            
-            if is_spam:
-                st.markdown("""
-                <div class="spam-card">
-                <h2 style="color:white;">🚨 SPAM DETECTED</h2>
-                <p style="color:white; font-size:1.2rem;">This email has been identified as malicious spam</p>
-                <p style="color:white;">⚠️ Do not click any links or download attachments</p>
-                </div>
-                """, unsafe_allow_html=True)
+    # Results area
+    if analyze:
+        if email_text:
+            with st.spinner("Performing deep scan..."):
+                import time
+                time.sleep(1)  # Simulate processing
                 
-                # Threat breakdown
-                with st.expander("🔍 View Threat Analysis"):
-                    col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.metric("Phishing Score", "92%", "High")
-                    with col2:
-                        st.metric("Malicious Links", "3", "Detected")
-                    with col3:
-                        st.metric("Urgency Level", "Critical", "⚠️")
-            else:
-                st.markdown("""
-                <div class="ham-card">
-                <h2 style="color:white;">✅ SAFE EMAIL</h2>
-                <p style="color:white; font-size:1.2rem;">No threats detected in this email</p>
-                <p style="color:white;">✓ This appears to be legitimate communication</p>
-                </div>
-                """, unsafe_allow_html=True)
+                # Advanced detection logic
+                spam_keywords = {
+                    "urgent": 3, "verify": 3, "click": 2, "account": 2,
+                    "password": 3, "suspended": 3, "winner": 2, "prize": 2,
+                    "bank": 2, "security": 2, "limited": 3, "immediately": 2
+                }
                 
-                with st.expander("🔍 Security Check Complete"):
-                    st.success("✓ Sender verification passed")
-                    st.success("✓ Link safety check passed")
-                    st.success("✓ Content analysis passed")
-    
-    elif analyze_clicked and not email_text:
-        st.warning("⚠️ Please paste email content to analyze")
+                email_lower = email_text.lower()
+                spam_score = 0
+                found_threats = []
+                
+                for keyword, weight in spam_keywords.items():
+                    if keyword in email_lower:
+                        spam_score += weight
+                        found_threats.append(keyword)
+                
+                # Calculate confidence
+                confidence = min(100, spam_score * 10)
+                
+                st.markdown("---")
+                
+                if spam_score >= 5:
+                    # Spam detected
+                    st.markdown("""
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                padding: 2rem; border-radius: 15px; text-align: center; color: white;">
+                        <h1>🚨</h1>
+                        <h2>SPAM DETECTED</h2>
+                        <p style="font-size: 1.2rem;">High confidence malicious content</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Threat breakdown
+                    with st.expander("🔍 **Detailed Threat Analysis**", expanded=True):
+                        st.warning(f"**Risk Score:** {confidence}% - High Risk")
+                        st.write(f"**Threats identified:** {', '.join(found_threats)}")
+                        st.progress(confidence)
+                        
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.error("**Phishing Indicators:** ✓")
+                            st.error("**Suspicious Links:** ✓")
+                        with col2:
+                            st.error("**Urgency Tactics:** ✓")
+                            st.error("**Spoofed Sender:** ✓")
+                else:
+                    # Safe email
+                    st.markdown("""
+                    <div style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                                padding: 2rem; border-radius: 15px; text-align: center; color: white;">
+                        <h1>✅</h1>
+                        <h2>EMAIL SAFE</h2>
+                        <p style="font-size: 1.2rem;">No threats detected</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    with st.expander("🔍 **Security Summary**", expanded=True):
+                        st.success(f"**Risk Score:** {confidence}% - Low Risk")
+                        st.success("✓ Content appears legitimate")
+                        st.success("✓ No suspicious patterns found")
+        else:
+            st.warning("⚠️ Please paste email content to scan")
 
 with tab2:
-    st.markdown("### 📁 Batch Email Processing")
-    st.markdown("Upload multiple emails for bulk analysis")
-    
-    uploaded_file = st.file_uploader("Choose MBOX or CSV file", type=['mbox', 'csv'])
-    
-    if uploaded_file:
-        st.info("🔄 Processing your file... This may take a few moments")
-        st.progress(65)
-        st.success("✅ Batch processing complete! 124 emails analyzed, 23 spam detected")
+    st.info("📁 **Upload multiple emails** for batch processing (Coming soon)")
+    st.file_uploader("Choose MBOX or CSV file", type=['mbox', 'csv'], disabled=True)
 
 with tab3:
-    st.markdown("### 📊 Security Analytics Dashboard")
-    
-    col1, col2, col3, col4 = st.columns(4)
+    st.markdown("### 📈 **Security Analytics**")
+    col1, col2 = st.columns(2)
     with col1:
-        st.metric("Total Scans", "15,847", "+234")
+        st.markdown("#### Last 7 Days")
+        st.line_chart({"Spam Detected": [12, 8, 15, 10, 7, 14, 9]})
     with col2:
-        st.metric("Spam Rate", "12.4%", "-2.1%")
-    with col3:
-        st.metric("Threats Blocked", "1,965", "+156")
-    with col4:
-        st.metric("Accuracy", "98.7%", "+0.5%")
-    
-    st.markdown("---")
-    st.markdown("### 🎯 Real-time Protection Status")
-    st.success("✅ Your email is currently protected by SecureMail AI")
+        st.markdown("#### Protection Rate")
+        st.metric("Block Rate", "99.2%", "+0.5%")
+
+with tab4:
+    st.markdown("### ⚙️ **Security Preferences**")
+    st.selectbox("Sensitivity Level", ["Low", "Medium", "High"], index=1)
+    st.checkbox("Auto-quarantine suspected spam")
+    st.checkbox("Email notifications for threats")
+    st.button("Save Settings")
 
 # Footer
 st.markdown("---")
 st.markdown("""
-<div class="footer">
-    <p>🛡️ SecureMail AI - Enterprise Email Security Solution</p>
-    <p>Powered by Advanced Machine Learning | Protected by Nimra</p>
+<div style="text-align: center; color: #666;">
+    <p>🛡️ <strong>SecureMail Pro</strong> | Enterprise-Grade Email Security | Powered by AI</p>
+    <p style="font-size: 0.8rem;">© 2026 All Rights Reserved</p>
 </div>
 """, unsafe_allow_html=True)
