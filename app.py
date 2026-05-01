@@ -1,8 +1,5 @@
 import streamlit as st
-import pickle
 import joblib
-import os
-import sys
 from pathlib import Path
 
 # Page configuration - MUST be first Streamlit command
@@ -88,26 +85,14 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
+        text-align: center;
     }
     
     .header-subtitle {
         font-size: 1.1rem;
         color: #666;
         margin-bottom: 2rem;
-    }
-    
-    /* Feature cards */
-    .feature-card {
-        background: white;
-        padding: 1rem;
-        border-radius: 10px;
         text-align: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    /* Sidebar styling */
-    .css-1d391kg {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
     }
     
     /* Info box */
@@ -130,12 +115,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Header Section
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.markdown('<div style="text-align: center;">', unsafe_allow_html=True)
-    st.markdown('<p class="header-title">🛡️ SecureMail AI</p>', unsafe_allow_html=True)
-    st.markdown('<p class="header-subtitle">Enterprise-Grade Email Security Powered by Machine Learning</p>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<p class="header-title">🛡️ SecureMail AI</p>', unsafe_allow_html=True)
+st.markdown('<p class="header-subtitle">Enterprise-Grade Email Security Powered by Machine Learning</p>', unsafe_allow_html=True)
+
+# Load model function
+@st.cache_resource
+def load_model():
+    try:
+        # Try to load from outputs directory
+        model_path = Path("outputs/model.pkl")
+        vectorizer_path = Path("outputs/vectorizer.pkl")
+        
+        if model_path.exists() and vectorizer_path.exists():
+            model = joblib.load(model_path)
+            vectorizer = joblib.load(vectorizer_path)
+            return model, vectorizer
+        else:
+            return None, None
+    except Exception:
+        return None, None
 
 # Sidebar content
 with st.sidebar:
@@ -204,13 +202,22 @@ with tab1:
         with st.spinner("Analyzing email content..."):
             st.markdown("---")
             
-            # Simulate prediction (replace with actual model prediction)
-            import random
-model, vectorizer = load_model()
-prediction = model.predict(vectorizer.transform([email_text]))
-is_spam = prediction == 1            
+            # Load model and predict
+            model, vectorizer = load_model()
+            
+            if model is not None and vectorizer is not None:
+                # Transform the input and predict
+                email_vectorized = vectorizer.transform([email_text])
+                prediction = model.predict(email_vectorized)[0]
+                is_spam = (prediction == 1)
+            else:
+                # Fallback to demo mode if model not found
+                import random
+                is_spam = random.choice([True, False])
+                st.info("ℹ️ Demo mode - using sample prediction. Train the model for real results.")
+            
             if is_spam:
-                st.markdown(f"""
+                st.markdown("""
                 <div class="spam-card">
                 <h2 style="color:white;">🚨 SPAM DETECTED</h2>
                 <p style="color:white; font-size:1.2rem;">This email has been identified as malicious spam</p>
@@ -226,9 +233,9 @@ is_spam = prediction == 1
                     with col2:
                         st.metric("Malicious Links", "3", "Detected")
                     with col3:
-                        st.metric="Urgency Level", "Critical", "⚠️"
+                        st.metric("Urgency Level", "Critical", "⚠️")
             else:
-                st.markdown(f"""
+                st.markdown("""
                 <div class="ham-card">
                 <h2 style="color:white;">✅ SAFE EMAIL</h2>
                 <p style="color:white; font-size:1.2rem;">No threats detected in this email</p>
@@ -237,12 +244,12 @@ is_spam = prediction == 1
                 """, unsafe_allow_html=True)
                 
                 with st.expander("🔍 Security Check Complete"):
-                    st.success("• Sender verification passed")
-                    st.success("• Link safety check passed")
-                    st.success("• Content analysis passed")
+                    st.success("✓ Sender verification passed")
+                    st.success("✓ Link safety check passed")
+                    st.success("✓ Content analysis passed")
     
     elif analyze_clicked and not email_text:
-        st.warning("Please paste email content to analyze")
+        st.warning("⚠️ Please paste email content to analyze")
 
 with tab2:
     st.markdown("### 📁 Batch Email Processing")
