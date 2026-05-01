@@ -244,7 +244,7 @@ with tab4:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666;">
-    <p>🛡️ <strong>SecureMail Pro</strong> | Enterprise-Grade Email Security | Powered by AI</p>
-    <p style="font-size: 0.8rem;">© 2026 All Rights Reserved</p>
+    <p>🛡️ <strong>SecureMail Pro</strong> | Enterprise-Grade Email Security</p>
+    
 </div>
 """, unsafe_allow_html=True)
