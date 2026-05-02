@@ -1,21 +1,25 @@
 import streamlit as st
-import random
+import pandas as pd
 from datetime import datetime
+import random
 
 st.set_page_config(
-    page_title="Nimra's AI Spam Detector",
+    page_title="AI Spam Detector | Nimra Iftikhar",
     page_icon="🛡️",
     layout="wide"
 )
-# CLEAN LIGHT THEME - Easy to read
+
+# Initialize session state for history
+if 'history' not in st.session_state:
+    st.session_state.history = []
+
+# Clean white background
 st.markdown("""
 <style>
-    /* Clean white background */
     .stApp {
         background: #f8f9fa;
     }
     
-    /* Professional header */
     .main-header {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         padding: 2rem;
@@ -27,7 +31,7 @@ st.markdown("""
     .main-header h1 {
         color: white !important;
         margin: 0;
-        font-size: 2rem;
+        font-size: 2.5rem;
     }
     
     .main-header p {
@@ -35,7 +39,6 @@ st.markdown("""
         margin: 10px 0 0 0;
     }
     
-    /* Result cards with good contrast */
     .spam-card {
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         padding: 2rem;
@@ -58,12 +61,6 @@ st.markdown("""
         color: white !important;
     }
     
-    /* Make text in main area dark for readability */
-    .stMarkdown, .stTextArea label {
-        color: #1a1a2e !important;
-    }
-    
-    /* Text area styling */
     .stTextArea textarea {
         background: white;
         color: #1a1a2e;
@@ -71,7 +68,6 @@ st.markdown("""
         border-radius: 10px;
     }
     
-    /* Button styling */
     .stButton > button {
         background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         color: white;
@@ -81,34 +77,19 @@ st.markdown("""
         border-radius: 10px;
     }
     
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
-    }
-    
-    /* Sidebar */
-    .css-1d391kg {
-        background: #ffffff;
-        border-right: 1px solid #e0e0e0;
-    }
-    
-    /* Metrics cards */
-    .stMetric {
+    .history-card {
         background: white;
-        border-radius: 10px;
         padding: 10px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        border-left: 4px solid #1a1a2e;
     }
     
-    /* Expander */
-    .streamlit-expanderHeader {
-        color: #1a1a2e !important;
-        background: #f0f0f0;
-        border-radius: 10px;
-    }
-    
-    /* Success/Warning/Error messages */
-    .stAlert {
-        border-radius: 10px;
+    .footer {
+        text-align: center;
+        color: #666;
+        padding: 1rem;
+        margin-top: 2rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -116,24 +97,13 @@ st.markdown("""
 # Header
 st.markdown("""
 <div class="main-header">
-    <h1>🛡️ NIMRA'S AI SPAM DETECTOR</h1>
+    <h1>🤖 AI SPAM DETECTOR</h1>
+    <p>Copy. Paste. Know if it's REAL or SCAM.</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
-    st.markdown("## 👩‍💻 Developer")
-    st.info("Nimra")
-    st.markdown("---")
-    
-    st.markdown("## 📊 Live Protection Stats")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Emails Protected", "15,847", "+12%")
-    with col2:
-        st.metric("Spam Blocked", "1,234", "+8%")
-    
-    st.markdown("---")
     st.markdown("## 🚨 Spam Indicators")
     st.warning("• Urgent language")
     st.warning("• Suspicious links")
@@ -142,11 +112,13 @@ with st.sidebar:
     st.warning("• Unknown sender")
     
     st.markdown("---")
-    st.caption(f"© 2026 Nimra | Updated: {datetime.now().strftime('%I:%M %p')}")
+    
+    if st.button("🗑️ Clear History"):
+        st.session_state.history = []
+        st.rerun()
 
 # Main content
 st.markdown("## 📧 Email Analysis Engine")
-st.caption("Paste the email content below to check if it's spam or safe")
 
 col1, col2 = st.columns([2, 1])
 
@@ -154,14 +126,12 @@ with col1:
     email_text = st.text_area(
         "",
         height=200,
-        placeholder="""Example email content:
+        placeholder="""Paste any email here...
 
+Example:
 Congratulations! You've won $1,000,000!
 Click here to claim your prize now: http://fake-link.com
-Hurry! This offer expires in 24 hours.
-
-Best regards,
-Prize Department""",
+Hurry! This offer expires in 24 hours.""",
         label_visibility="collapsed"
     )
     
@@ -170,67 +140,94 @@ Prize Department""",
         analyze = st.button("🔍 Analyze Email", use_container_width=True)
 
 with col2:
-    st.markdown("### ⚡ Quick Tips")
-    with st.expander("How to spot spam", expanded=True):
-        st.markdown("""
-        ✅ Check sender email address
-        ✅ Look for spelling errors
-        ✅ Hover over links before clicking
-        ✅ Never share personal info
-        """)
+    st.markdown("### 💡 Quick Tips")
+    st.markdown("""
+    ✅ Check sender email
+    ✅ Look for spelling errors
+    ✅ Hover before clicking
+    ✅ Never share passwords
+    """)
 
-# Results
-if analyze:
-    if email_text:
-        with st.spinner("Nimra's AI analyzing email..."):
-            import time
-            time.sleep(1.5)
+# Analysis Results
+if analyze and email_text:
+    with st.spinner("Analyzing..."):
+        # Spam detection logic
+        spam_keywords = ["win", "prize", "click", "urgent", "verify", 
+                        "password", "million", "free", "claim", "lottery",
+                        "congratulations", "limited", "expires", "bank", "account"]
+        
+        email_lower = email_text.lower()
+        found_keywords = [w for w in spam_keywords if w in email_lower]
+        spam_score = len(found_keywords)
+        confidence = min(100, spam_score * 12)
+        
+        # Determine result
+        is_spam = spam_score >= 2
+        
+        # Save to history
+        st.session_state.history.insert(0, {
+            "date": datetime.now().strftime("%H:%M:%S"),
+            "text": email_text[:100] + "..." if len(email_text) > 100 else email_text,
+            "result": "SPAM" if is_spam else "SAFE",
+            "confidence": confidence,
+            "keywords": found_keywords
+        })
+        
+        # Keep only last 10
+        st.session_state.history = st.session_state.history[:10]
+        
+        # Display result
+        if is_spam:
+            st.markdown("""
+            <div class="spam-card">
+                <h1>🚨 SPAM DETECTED</h1>
+                <p style="font-size:1.2rem;">This email appears to be spam/scam</p>
+                <p>⚠️ Do not click any links or reply</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            spam_keywords = ["win", "prize", "click", "urgent", "verify", 
-                            "password", "million", "free", "claim", "lottery",
-                            "congratulations", "limited", "expires", "bank"]
+            with st.expander("📋 Detailed Analysis", expanded=True):
+                st.error(f"**Risk Score:** {confidence}% - HIGH RISK")
+                st.write(f"**Suspicious keywords found:** {', '.join(found_keywords)}")
+                st.warning("**Recommendation:** Delete this email immediately")
+                st.progress(confidence/100)
+        else:
+            st.markdown("""
+            <div class="safe-card">
+                <h1>✅ SAFE EMAIL</h1>
+                <p style="font-size:1.2rem;">No threats detected</p>
+                <p>✓ This email appears legitimate</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            email_lower = email_text.lower()
-            found_keywords = [w for w in spam_keywords if w in email_lower]
-            spam_score = len(found_keywords)
-            
-            if spam_score >= 2:
-                st.markdown("""
-                <div class="spam-card">
-                    <h1>🚨 SPAM DETECTED</h1>
-                    <p style="font-size:1.2rem;">This email has been identified as spam</p>
-                    <p>⚠️ Do not click any links or download attachments</p>
-                    <p>⚠️ Do not reply or provide personal information</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                with st.expander("📋 View Detailed Analysis"):
-                    st.error(f"**Risk Level:** HIGH ({(spam_score * 15)}%)")
-                    st.write(f"**Suspicious keywords found:** {', '.join(found_keywords)}")
-                    st.warning("**Recommendation:** Delete this email immediately")
-                    st.progress(95)
-            else:
-                st.markdown("""
-                <div class="safe-card">
-                    <h1>✅ SAFE EMAIL</h1>
-                    <p style="font-size:1.2rem;">No threats detected</p>
-                    <p>✓ This email appears to be legitimate</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                with st.expander("📋 Security Summary"):
-                    st.success(f"**Risk Level:** LOW ({spam_score * 15}%)")
-                    st.success("✓ No spam patterns detected")
-                    st.success("✓ Content appears legitimate")
-                    st.progress(10)
-    else:
-        st.warning("⚠️ Please paste email content to analyze")
+            with st.expander("📋 Security Summary", expanded=True):
+                st.success(f"**Risk Score:** {confidence}% - LOW RISK")
+                st.success("✓ No suspicious patterns detected")
+                st.progress(confidence/100)
+
+elif analyze and not email_text:
+    st.warning("⚠️ Please paste some email content to analyze")
+
+# History Section
+st.markdown("---")
+st.markdown("## 📜 Analysis History")
+
+if st.session_state.history:
+    for item in st.session_state.history:
+        color = "#dc3545" if item["result"] == "SPAM" else "#28a745"
+        st.markdown(f"""
+        <div class="history-card" style="border-left-color: {color};">
+            <small>{item['date']}</small>
+            <p><strong>Result:</strong> {item['result']} | <strong>Confidence:</strong> {item['confidence']}%</p>
+            <p><small>{item['text']}</small></p>
+        </div>
+        """, unsafe_allow_html=True)
+else:
+    st.info("No analysis yet. Paste an email above and click Analyze!")
 
 # Footer
-st.markdown("---")
 st.markdown("""
-<div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🛡️ <strong>Nimra's AI Spam Detector>
-
+<div class="footer">
+    <p>🤖 <strong>AI SPAM DETECTOR</strong> | Made by Nimra Iftikhar</p>
 </div>
 """, unsafe_allow_html=True)
