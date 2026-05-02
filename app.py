@@ -126,7 +126,7 @@ st.markdown(f"""
 # Header
 st.markdown("""
 <div class="main-header">
-    <h1>🤖 AI SPAM DETECTOR</h1>
+    <h1> AI SPAM DETECTOR</h1>
     <p>Copy. Paste. Know if it's REAL or SCAM.</p>
 </div>
 """, unsafe_allow_html=True)
