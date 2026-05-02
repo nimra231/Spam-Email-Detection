@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import json
 import random
 
 st.set_page_config(
@@ -9,88 +10,116 @@ st.set_page_config(
     layout="wide"
 )
 
-# Initialize session state for history
+# Initialize session state
 if 'history' not in st.session_state:
     st.session_state.history = []
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
 
-# Clean white background
-st.markdown("""
+# Dark mode toggle function
+def toggle_theme():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+
+# Theme based styling
+if st.session_state.dark_mode:
+    bg_color = "#1a1a2e"
+    text_color = "#ffffff"
+    card_bg = "#16213e"
+    border_color = "#0f3460"
+else:
+    bg_color = "#f8f9fa"
+    text_color = "#1a1a2e"
+    card_bg = "#ffffff"
+    border_color = "#ddd"
+
+# Custom CSS
+st.markdown(f"""
 <style>
-    .stApp {
-        background: #f8f9fa;
-    }
+    .stApp {{
+        background: {bg_color};
+    }}
     
-    .main-header {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    .main-header {{
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 2rem;
         border-radius: 15px;
         margin-bottom: 2rem;
         text-align: center;
-    }
+    }}
     
-    .main-header h1 {
+    .main-header h1 {{
         color: white !important;
         margin: 0;
         font-size: 2.5rem;
-    }
+    }}
     
-    .main-header p {
-        color: #ccc !important;
+    .main-header p {{
+        color: rgba(255,255,255,0.9) !important;
         margin: 10px 0 0 0;
-    }
+    }}
     
-    .spam-card {
+    .spam-card {{
         background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
         padding: 2rem;
         border-radius: 15px;
         text-align: center;
-    }
+    }}
     
-    .spam-card h1, .spam-card p {
+    .spam-card h1, .spam-card p {{
         color: white !important;
-    }
+    }}
     
-    .safe-card {
+    .safe-card {{
         background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
         padding: 2rem;
         border-radius: 15px;
         text-align: center;
-    }
+    }}
     
-    .safe-card h1, .safe-card p {
+    .safe-card h1, .safe-card p {{
         color: white !important;
-    }
+    }}
     
-    .stTextArea textarea {
-        background: white;
-        color: #1a1a2e;
-        border: 1px solid #ddd;
+    .stTextArea textarea {{
+        background: {card_bg};
+        color: {text_color};
+        border: 1px solid {border_color};
         border-radius: 10px;
-    }
+    }}
     
-    .stButton > button {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    .stButton > button {{
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border: none;
         padding: 0.7rem 2rem;
         font-weight: 600;
         border-radius: 10px;
-    }
+    }}
     
-    .history-card {
-        background: white;
+    .history-card {{
+        background: {card_bg};
         padding: 10px;
         border-radius: 10px;
         margin-bottom: 10px;
-        border-left: 4px solid #1a1a2e;
-    }
+        border-left: 4px solid #667eea;
+        color: {text_color};
+    }}
     
-    .footer {
+    .stat-card {{
+        background: {card_bg};
+        padding: 1rem;
+        border-radius: 10px;
         text-align: center;
-        color: #666;
+        border: 1px solid {border_color};
+    }}
+    
+    .footer {{
+        text-align: center;
+        color: {text_color if st.session_state.dark_mode else '#666'};
         padding: 1rem;
         margin-top: 2rem;
-    }
+        opacity: 0.7;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -104,6 +133,15 @@ st.markdown("""
 
 # Sidebar
 with st.sidebar:
+    st.markdown("## ⚙️ Settings")
+    
+    # Dark mode toggle
+    if st.button("🌙 Dark Mode" if not st.session_state.dark_mode else "☀️ Light Mode"):
+        toggle_theme()
+        st.rerun()
+    
+    st.markdown("---")
+    
     st.markdown("## 🚨 Spam Indicators")
     st.warning("• Urgent language")
     st.warning("• Suspicious links")
@@ -116,6 +154,52 @@ with st.sidebar:
     if st.button("🗑️ Clear History"):
         st.session_state.history = []
         st.rerun()
+
+# Statistics Dashboard
+st.markdown("## 📊 Statistics Dashboard")
+
+if st.session_state.history:
+    total_scans = len(st.session_state.history)
+    spam_count = sum(1 for h in st.session_state.history if h["result"] == "SPAM")
+    safe_count = total_scans - spam_count
+    spam_percentage = (spam_count / total_scans) * 100
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown(f"""
+        <div class="stat-card">
+            <h3>📊 {total_scans}</h3>
+            <p>Total Scans</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div class="stat-card">
+            <h3>🚨 {spam_count}</h3>
+            <p>Spam Detected</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"""
+        <div class="stat-card">
+            <h3>✅ {safe_count}</h3>
+            <p>Safe Emails</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col4:
+        st.markdown(f"""
+        <div class="stat-card">
+            <h3>{spam_percentage:.1f}%</h3>
+            <p>Spam Rate</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Progress bar
+    st.progress(spam_percentage / 100)
+else:
+    st.info("No scans yet. Analyze an email to see statistics!")
+
+st.markdown("---")
 
 # Main content
 st.markdown("## 📧 Email Analysis Engine")
@@ -151,7 +235,6 @@ with col2:
 # Analysis Results
 if analyze and email_text:
     with st.spinner("Analyzing..."):
-        # Spam detection logic
         spam_keywords = ["win", "prize", "click", "urgent", "verify", 
                         "password", "million", "free", "claim", "lottery",
                         "congratulations", "limited", "expires", "bank", "account"]
@@ -161,20 +244,19 @@ if analyze and email_text:
         spam_score = len(found_keywords)
         confidence = min(100, spam_score * 12)
         
-        # Determine result
         is_spam = spam_score >= 2
         
         # Save to history
         st.session_state.history.insert(0, {
-            "date": datetime.now().strftime("%H:%M:%S"),
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "text": email_text[:100] + "..." if len(email_text) > 100 else email_text,
             "result": "SPAM" if is_spam else "SAFE",
             "confidence": confidence,
-            "keywords": found_keywords
+            "keywords": found_keywords,
+            "full_text": email_text
         })
         
-        # Keep only last 10
-        st.session_state.history = st.session_state.history[:10]
+        st.session_state.history = st.session_state.history[:20]
         
         # Display result
         if is_spam:
@@ -185,12 +267,6 @@ if analyze and email_text:
                 <p>⚠️ Do not click any links or reply</p>
             </div>
             """, unsafe_allow_html=True)
-            
-            with st.expander("📋 Detailed Analysis", expanded=True):
-                st.error(f"**Risk Score:** {confidence}% - HIGH RISK")
-                st.write(f"**Suspicious keywords found:** {', '.join(found_keywords)}")
-                st.warning("**Recommendation:** Delete this email immediately")
-                st.progress(confidence/100)
         else:
             st.markdown("""
             <div class="safe-card">
@@ -199,11 +275,49 @@ if analyze and email_text:
                 <p>✓ This email appears legitimate</p>
             </div>
             """, unsafe_allow_html=True)
-            
-            with st.expander("📋 Security Summary", expanded=True):
-                st.success(f"**Risk Score:** {confidence}% - LOW RISK")
-                st.success("✓ No suspicious patterns detected")
+        
+        # Detailed Analysis with Copy & Export
+        with st.expander("📋 Detailed Analysis", expanded=True):
+            col_a, col_b = st.columns([3, 1])
+            with col_a:
+                if is_spam:
+                    st.error(f"**Risk Score:** {confidence}% - HIGH RISK")
+                    st.write(f"**Suspicious keywords found:** {', '.join(found_keywords) if found_keywords else 'None'}")
+                    st.warning("**Recommendation:** Delete this email immediately")
+                else:
+                    st.success(f"**Risk Score:** {confidence}% - LOW RISK")
+                    st.success("✓ No suspicious patterns detected")
                 st.progress(confidence/100)
+            
+            with col_b:
+                # Copy result button
+                result_text = f"Result: { 'SPAM' if is_spam else 'SAFE' }\nConfidence: {confidence}%\nAnalyzed by AI Spam Detector - Nimra Iftikhar"
+                if st.button("📋 Copy Result"):
+                    st.write("✅ Copied to clipboard!")
+                    st.code(result_text)
+                
+                # Export button
+                if st.button("📥 Export as TXT"):
+                    export_content = f"""
+AI SPAM DETECTOR - ANALYSIS REPORT
+=====================================
+Date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+Result: {'SPAM DETECTED' if is_spam else 'SAFE EMAIL'}
+Confidence: {confidence}%
+
+Email Content:
+{email_text}
+
+Suspicious Keywords: {', '.join(found_keywords) if found_keywords else 'None'}
+
+Report Generated by: Nimra Iftikhar
+"""
+                    st.download_button(
+                        label="📥 Download Report",
+                        data=export_content,
+                        file_name=f"spam_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                        mime="text/plain"
+                    )
 
 elif analyze and not email_text:
     st.warning("⚠️ Please paste some email content to analyze")
@@ -213,7 +327,7 @@ st.markdown("---")
 st.markdown("## 📜 Analysis History")
 
 if st.session_state.history:
-    for item in st.session_state.history:
+    for item in st.session_state.history[:10]:
         color = "#dc3545" if item["result"] == "SPAM" else "#28a745"
         st.markdown(f"""
         <div class="history-card" style="border-left-color: {color};">
@@ -226,7 +340,7 @@ else:
     st.info("No analysis yet. Paste an email above and click Analyze!")
 
 # Footer
-st.markdown("""
+st.markdown(f"""
 <div class="footer">
     <p>🤖 <strong>AI SPAM DETECTOR</strong> | Made by Nimra Iftikhar</p>
 </div>
